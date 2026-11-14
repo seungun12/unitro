@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import CopyButton from "@/components/shared/CopyButton";
+import NumericInput from "@/components/shared/NumericInput";
 import CategoryTool from "@/components/converter/CategoryTool";
 import { convertUnitValue, formatConvertedValue, formatInputValue, getConverterCategory } from "@/lib/converters/unit-conversions";
 import { ConverterSlug } from "@/types/converter";
@@ -40,7 +41,7 @@ export default function ConverterPage({ categorySlug }: ConverterPageProps) {
 
   const conversion = useMemo(() => {
     const trimmedInput = activeInput.trim();
-    if (!trimmedInput) return { convertedValue: "", message: "어느 쪽이든 변환할 값을 입력해 주세요." };
+    if (!trimmedInput) return { convertedValue: "", message: "" };
     const numericValue = Number(trimmedInput);
     if (!Number.isFinite(numericValue)) return { convertedValue: "", message: "올바른 숫자를 입력해 주세요." };
     if (numericValue < 0 && !category.allowsNegative) return { convertedValue: "", message: "0 이상의 값을 입력해 주세요." };
@@ -98,19 +99,15 @@ export default function ConverterPage({ categorySlug }: ConverterPageProps) {
               <p id="precision-help" className="mt-1 text-sm text-muted-foreground">계산값에 표시할 소수점 자릿수를 설정하세요.</p>
             </div>
             <div className="flex items-center gap-2">
-              <Input
+              <NumericInput
                 id="decimal-precision"
-                type="number"
                 min={0}
                 max={10}
                 step={1}
+                integer
                 value={precision}
-                onChange={(event) => {
-                  const nextPrecision = event.target.valueAsNumber;
-                  if (Number.isFinite(nextPrecision)) {
-                    setPrecision(Math.min(10, Math.max(0, Math.trunc(nextPrecision))));
-                  }
-                }}
+                emptyValue={2}
+                onValueChange={setPrecision}
                 className="h-9 w-20 text-center"
                 aria-describedby="precision-help"
               />
@@ -144,10 +141,6 @@ export default function ConverterPage({ categorySlug }: ConverterPageProps) {
       <div className="-mt-2 px-1 text-sm" aria-live="polite">
         <p id="conversion-help" className="text-muted-foreground">어느 쪽 값을 수정해도 설정한 소수점 정확도로 반대쪽 값이 바로 계산됩니다.</p>
         {conversion.message && <p id="conversion-error" className="mt-1 text-destructive">{conversion.message}</p>}
-      </div>
-
-      <div className="pt-10 md:pt-14">
-        <CategoryTool categorySlug={categorySlug} precision={precision} />
       </div>
 
       <Card>
@@ -197,6 +190,10 @@ export default function ConverterPage({ categorySlug }: ConverterPageProps) {
           </div>
         </CardContent>
       </Card>
+
+      <div className="pt-10 md:pt-14">
+        <CategoryTool categorySlug={categorySlug} precision={precision} />
+      </div>
 
       <section aria-labelledby="unit-guide-title" className="space-y-4">
         <div>

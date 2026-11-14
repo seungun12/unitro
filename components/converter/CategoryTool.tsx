@@ -5,6 +5,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import NumericInput from "@/components/shared/NumericInput";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatConvertedValue } from "@/lib/converters/unit-conversions";
@@ -51,11 +52,11 @@ function LengthScaleTool({ precision }: { precision: number }) {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="drawing-length">도면 길이 (mm)</Label>
-            <Input id="drawing-length" type="number" min={0.1} max={200} step={0.1} value={drawingLength} onChange={(event) => setDrawingLength(Math.max(0.1, event.target.valueAsNumber || 0.1))} />
+            <NumericInput id="drawing-length" min={0.1} max={200} step={0.1} value={drawingLength} onValueChange={setDrawingLength} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="drawing-scale">축척 (1 : N)</Label>
-            <Input id="drawing-scale" type="number" min={1} max={10000} step={1} value={scale} onChange={(event) => setScale(Math.max(1, event.target.valueAsNumber || 1))} />
+            <NumericInput id="drawing-scale" min={1} max={10000} step={1} integer value={scale} onValueChange={setScale} />
           </div>
         </div>
 
@@ -117,9 +118,9 @@ function WeightSumTool({ precision }: { precision: number }) {
           {items.map((item) => (
             <div key={item.id} className="grid gap-2 rounded-xl border bg-muted/20 p-3 sm:grid-cols-[1.3fr_1fr_110px_80px_36px] sm:items-end">
               <div className="space-y-1.5"><Label htmlFor={`weight-name-${item.id}`}>항목</Label><Input id={`weight-name-${item.id}`} value={item.name} onChange={(event) => updateItem(item.id, { name: event.target.value })} /></div>
-              <div className="space-y-1.5"><Label htmlFor={`weight-value-${item.id}`}>무게</Label><Input id={`weight-value-${item.id}`} type="number" min={0} step="any" value={item.weight} onChange={(event) => updateItem(item.id, { weight: Math.max(0, event.target.valueAsNumber || 0) })} /></div>
+              <div className="space-y-1.5"><Label htmlFor={`weight-value-${item.id}`}>무게</Label><NumericInput id={`weight-value-${item.id}`} min={0} step="any" value={item.weight} onValueChange={(weight) => updateItem(item.id, { weight })} /></div>
               <div className="space-y-1.5"><Label>단위</Label><Select value={item.unit} onValueChange={(unit: WeightUnit) => updateItem(item.id, { unit })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="g">그램</SelectItem><SelectItem value="kg">킬로그램</SelectItem><SelectItem value="oz">온스</SelectItem><SelectItem value="lb">파운드</SelectItem></SelectContent></Select></div>
-              <div className="space-y-1.5"><Label htmlFor={`weight-count-${item.id}`}>수량</Label><Input id={`weight-count-${item.id}`} type="number" min={1} step={1} value={item.count} onChange={(event) => updateItem(item.id, { count: Math.max(1, Math.trunc(event.target.valueAsNumber || 1)) })} /></div>
+              <div className="space-y-1.5"><Label htmlFor={`weight-count-${item.id}`}>수량</Label><NumericInput id={`weight-count-${item.id}`} min={1} step={1} integer value={item.count} onValueChange={(count) => updateItem(item.id, { count })} /></div>
               <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(item.id)} disabled={items.length === 1} aria-label={`${item.name} 삭제`}><Trash2 /></Button>
             </div>
           ))}
@@ -127,7 +128,7 @@ function WeightSumTool({ precision }: { precision: number }) {
         <Button type="button" variant="outline" onClick={addItem}><Plus />항목 추가</Button>
 
         <div className="space-y-2 rounded-xl border p-4">
-          <div className="flex items-center justify-between gap-4"><Label htmlFor="share-count">균등 배분 개수</Label><Input id="share-count" type="number" min={1} step={1} value={shareCount} onChange={(event) => setShareCount(Math.max(1, Math.trunc(event.target.valueAsNumber || 1)))} className="w-24" /></div>
+          <div className="flex items-center justify-between gap-4"><Label htmlFor="share-count">균등 배분 개수</Label><NumericInput id="share-count" min={1} step={1} integer value={shareCount} onValueChange={setShareCount} className="w-24" /></div>
           <div className="h-3 overflow-hidden rounded-full bg-muted">
             {items.map((item) => {
               const ratio = totalKilograms ? (weightToKilograms(item.weight, item.unit) * item.count / totalKilograms) * 100 : 0;
@@ -173,7 +174,7 @@ function TemperatureTool({ precision }: { precision: number }) {
             <div className="relative -mt-1 h-16 w-16 rounded-full border-2 bg-background"><div className="absolute inset-2 rounded-full bg-blue-600" /></div>
           </div>
           <div className="space-y-5">
-            <div className="space-y-2"><Label htmlFor="temperature-celsius">{mode === "absolute" ? "섭씨 온도" : "섭씨 온도 차이"} (°C)</Label><Input id="temperature-celsius" type="number" step="any" value={celsius} onChange={(event) => setCelsius(event.target.valueAsNumber || 0)} /></div>
+            <div className="space-y-2"><Label htmlFor="temperature-celsius">{mode === "absolute" ? "섭씨 온도" : "섭씨 온도 차이"} (°C)</Label><NumericInput id="temperature-celsius" step="any" value={celsius} onValueChange={setCelsius} /></div>
             <input aria-label="온도 조절" type="range" min={min} max={max} step={0.5} value={Math.min(max, Math.max(min, celsius))} onChange={(event) => setCelsius(Number(event.target.value))} className="w-full accent-blue-600" />
             <div className="flex flex-wrap gap-2">{presets.map((preset) => <Button key={preset} type="button" variant="outline" size="sm" onClick={() => setCelsius(preset)}>{preset}°C</Button>)}</div>
           </div>
@@ -253,8 +254,8 @@ function AreaRectangleTool({ precision }: { precision: number }) {
           <div className="space-y-4">
             <div className="space-y-2"><Label>길이 단위</Label><Select value={unit} onValueChange={(value: DimensionUnit) => setUnit(value)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="m">미터 (m)</SelectItem><SelectItem value="cm">센티미터 (cm)</SelectItem><SelectItem value="ft">피트 (ft)</SelectItem></SelectContent></Select></div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2"><Label htmlFor="area-width">가로</Label><Input id="area-width" type="number" min={0.1} step={0.1} value={width} onChange={(event) => setWidth(Math.max(0.1, event.target.valueAsNumber || 0.1))} /></div>
-              <div className="space-y-2"><Label htmlFor="area-height">세로</Label><Input id="area-height" type="number" min={0.1} step={0.1} value={height} onChange={(event) => setHeight(Math.max(0.1, event.target.valueAsNumber || 0.1))} /></div>
+              <div className="space-y-2"><Label htmlFor="area-width">가로</Label><NumericInput id="area-width" min={0.1} step={0.1} value={width} onValueChange={setWidth} /></div>
+              <div className="space-y-2"><Label htmlFor="area-height">세로</Label><NumericInput id="area-height" min={0.1} step={0.1} value={height} onValueChange={setHeight} /></div>
             </div>
             <p className="text-sm leading-6 text-muted-foreground">손잡이 드래그 범위는 0.5~20{unit}입니다. 입력란에는 더 큰 값도 직접 입력할 수 있습니다.</p>
           </div>
@@ -311,17 +312,17 @@ function VolumeContainerTool({ precision }: { precision: number }) {
             <div className="space-y-2"><Label>치수 단위</Label><Select value={unit} onValueChange={(value: "cm" | "m") => setUnit(value)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="cm">센티미터 (cm)</SelectItem><SelectItem value="m">미터 (m)</SelectItem></SelectContent></Select></div>
             {shape === "box" ? (
               <div className="grid grid-cols-3 gap-3">
-                <div className="space-y-2"><Label htmlFor="volume-width">가로</Label><Input id="volume-width" type="number" min={0.1} step="any" value={width} onChange={(event) => setWidth(Math.max(0.1, event.target.valueAsNumber || 0.1))} /></div>
-                <div className="space-y-2"><Label htmlFor="volume-depth">세로</Label><Input id="volume-depth" type="number" min={0.1} step="any" value={depth} onChange={(event) => setDepth(Math.max(0.1, event.target.valueAsNumber || 0.1))} /></div>
-                <div className="space-y-2"><Label htmlFor="volume-height">높이</Label><Input id="volume-height" type="number" min={0.1} step="any" value={height} onChange={(event) => setHeight(Math.max(0.1, event.target.valueAsNumber || 0.1))} /></div>
+                <div className="space-y-2"><Label htmlFor="volume-width">가로</Label><NumericInput id="volume-width" min={0.1} step="any" value={width} onValueChange={setWidth} /></div>
+                <div className="space-y-2"><Label htmlFor="volume-depth">세로</Label><NumericInput id="volume-depth" min={0.1} step="any" value={depth} onValueChange={setDepth} /></div>
+                <div className="space-y-2"><Label htmlFor="volume-height">높이</Label><NumericInput id="volume-height" min={0.1} step="any" value={height} onValueChange={setHeight} /></div>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2"><Label htmlFor="volume-radius">반지름</Label><Input id="volume-radius" type="number" min={0.1} step="any" value={radius} onChange={(event) => setRadius(Math.max(0.1, event.target.valueAsNumber || 0.1))} /></div>
-                <div className="space-y-2"><Label htmlFor="volume-cylinder-height">높이</Label><Input id="volume-cylinder-height" type="number" min={0.1} step="any" value={height} onChange={(event) => setHeight(Math.max(0.1, event.target.valueAsNumber || 0.1))} /></div>
+                <div className="space-y-2"><Label htmlFor="volume-radius">반지름</Label><NumericInput id="volume-radius" min={0.1} step="any" value={radius} onValueChange={setRadius} /></div>
+                <div className="space-y-2"><Label htmlFor="volume-cylinder-height">높이</Label><NumericInput id="volume-cylinder-height" min={0.1} step="any" value={height} onValueChange={setHeight} /></div>
               </div>
             )}
-            <div className="space-y-2"><div className="flex justify-between text-sm"><Label htmlFor="fill-percent">채움 비율</Label><span className="font-medium">{fillPercent}%</span></div><Input id="fill-percent" type="number" min={0} max={100} step={1} value={fillPercent} onChange={(event) => setFillPercent(Math.min(100, Math.max(0, event.target.valueAsNumber || 0)))} /></div>
+            <div className="space-y-2"><div className="flex justify-between text-sm"><Label htmlFor="fill-percent">채움 비율</Label><span className="font-medium">{fillPercent}%</span></div><NumericInput id="fill-percent" min={0} max={100} step={1} integer value={fillPercent} onValueChange={setFillPercent} /></div>
           </div>
         </div>
 
